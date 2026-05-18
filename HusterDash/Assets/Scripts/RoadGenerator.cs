@@ -25,15 +25,10 @@ public class RoadGenerator : MonoBehaviour
     private Queue<GameObject> activeRoads = new Queue<GameObject>();
     private Queue<GameObject> inactivePool = new Queue<GameObject>();
     private float lastSpawnZ;           // 最后一个生成的道路块的 Z 坐标
-    private float initialPlayerZ;       // 用于计算方向索引的起始 Z 值
 
     void Start()
     {
-        // 记录玩家初始位置，用于方向索引计算
-        initialPlayerZ = player.position.z;
-
-        // 初始生成：从玩家前方 startOffset 米开始
-        // 假设玩家在 (0,0,0)，startOffset = 1，则从 z = 1 开始生成
+        // 初始化：从玩家前方 startOffset 米处开始生成
         lastSpawnZ = player.position.z + startOffset;
 
         // 向前生成直到覆盖 spawnDistance 范围
@@ -61,7 +56,6 @@ public class RoadGenerator : MonoBehaviour
         }
 
         // 2. 【回收】如果最旧的道路块已经落后于 despawnLimit，则回收
-        // 使用 Peek() 查看队列中最先进入的道路块
         while (activeRoads.Count > 0 && activeRoads.Peek().transform.position.z < despawnLimit)
         {
             GameObject oldestRoad = activeRoads.Dequeue();
@@ -70,7 +64,16 @@ public class RoadGenerator : MonoBehaviour
         }
     }
 
-    // SpawnRoad 函数
+    /// <summary>
+    /// 在指定 Z 坐标生成一个道路块，并为其设置车道方向和车辆生成器
+    /// 方向规律：每2米（2个道路块）改变一次方向。
+    /// 由于道路块长度为1米，因此：
+    ///   Z坐标范围 [0,2)  -> 正向 (x=1)
+    ///   [2,4) -> 负向 (x=-1)
+    ///   [4,6) -> 正向 ...
+    /// 如果希望从第一米开始正向（即 Z=1~3 正向，3~5 负向...），
+    /// 只需将计算索引时的基准偏移调整为 1 即可。
+    /// </summary>
     void SpawnRoad(float zPos)
     {
         GameObject road;
@@ -89,20 +92,24 @@ public class RoadGenerator : MonoBehaviour
         road.transform.position = new Vector3(0, 0, zPos);
         activeRoads.Enqueue(road);
 
-        // 计算车道方向
-        // 计算当前道路块相对于初始生成起点的索引 (按1米单位)
-        int blockIndex = Mathf.RoundToInt((zPos - initialPlayerZ) / blockLength);
-
-        // 每 2 米交替一次方向
-        float directionX = (blockIndex % 4 < 2) ? 1f : -1f;
+        // ========== 修正后的方向计算（与玩家位置无关） ==========
+        // 使用道路块自身的世界坐标 Z 计算组索引，确保每2米交替一次
+        // 为了让第一米（z=1 附近）为正向，引入偏移 1 米
+        float offset = 1f;   // 使 Z=1~3 为正向，3~5 为负向...
+        int blockIndex = Mathf.FloorToInt((zPos - offset) / blockLength);
+        int groupIndex = blockIndex / 2;           // 每2个块为一组
+        float directionX = (groupIndex % 2 == 0) ? 1f : -1f;   // 组号偶数正向，奇数负向
         Vector3 laneDirection = new Vector3(directionX, 0, 0);
+        Debug.Log($"[RoadGen] 生成道路块 z={zPos}, groupIndex={groupIndex}, 方向={(directionX > 0 ? "正向(→)" : "负向(←)")}");
+        // ========================================================
 
-        // 确保道路块上有 RoadLane 组件并存储方向
+        // 获取或添加 RoadLane 组件，并存储方向信息
         RoadLane laneInfo = road.GetComponent<RoadLane>();
-        if (laneInfo == null)
-        {
-            laneInfo = road.AddComponent<RoadLane>();
-        }
+        if (laneInfo == null) laneInfo = road.AddComponent<RoadLane>();
         laneInfo.direction = laneDirection;
+
+        // 获取或添加车辆生成器组件（生成器会自动读取 RoadLane 的方向）
+        BlockVehicleSpawner spawner = road.GetComponent<BlockVehicleSpawner>();
+        if (spawner == null) spawner = road.AddComponent<BlockVehicleSpawner>();
     }
 }

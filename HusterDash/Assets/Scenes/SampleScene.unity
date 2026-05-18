@@ -403,74 +403,6 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
---- !u!1001 &569578048
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: -8679921383154817045, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -3
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.5906335
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.59063345
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0.38878286
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0.3887829
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 919132149155446097, guid: ba31965b366eab04fa37d21c458978a2,
-        type: 3}
-      propertyPath: m_Name
-      value: "\u9EC4\u8272\u7535\u52A8\u8F66"
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: ba31965b366eab04fa37d21c458978a2, type: 3}
 --- !u!1 &784321290
 GameObject:
   m_ObjectHideFlags: 0
@@ -658,7 +590,7 @@ MonoBehaviour:
   player: {fileID: 1758055178}
   roadPrefab: {fileID: 2230691642366490528, guid: 3caacf087f4fcef41ad61fb474e031eb,
     type: 3}
-  spawnDistance: 5
+  spawnDistance: 8
   despawnDistance: 5
   startOffset: 1
   blockLength: 1
@@ -723,6 +655,27 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1778289260}
   m_PrefabAsset: {fileID: 0}
+--- !u!65 &1758055179
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1758055174}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.47847104, y: 1.6355723, z: 0.24852598}
+  m_Center: {x: -0.000542365, y: 0.8093781, z: 0.03693813}
 --- !u!1001 &1778289260
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -784,7 +737,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 1d7ed1a6a461be245b9b5decba04daac,
         type: 3}
       propertyPath: m_Name
-      value: " \u4EBA\u7269"
+      value: ' Player'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -798,7 +751,61 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1758055177}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1d7ed1a6a461be245b9b5decba04daac,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1758055179}
   m_SourcePrefab: {fileID: 100100000, guid: 1d7ed1a6a461be245b9b5decba04daac, type: 3}
+--- !u!1 &1953357142
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1953357144}
+  - component: {fileID: 1953357143}
+  m_Layer: 0
+  m_Name: VehiclePool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1953357143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1953357142}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 237a4941dbaa9e14e844f944986d4666, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vehiclePrefabs:
+  - {fileID: 5156281089080746485, guid: a87c82098da14ae45b984e0e08c13e40, type: 3}
+  - {fileID: 1767728462546984304, guid: ddf827eae5f801b4796e537aeab27a91, type: 3}
+  - {fileID: 5432939604858843200, guid: 5b0af0d11674c5d4786b0bc686f63b0c, type: 3}
+  defaultCapacity: 20
+  maxSize: 80
+--- !u!4 &1953357144
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1953357142}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.26388794, y: 1.3722159, z: 0.23009877}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -808,5 +815,5 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 1778289260}
   - {fileID: 784321294}
-  - {fileID: 569578048}
   - {fileID: 1480377760}
+  - {fileID: 1953357144}
