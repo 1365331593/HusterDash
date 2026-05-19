@@ -5,37 +5,56 @@ using UnityEngine;
 public class RoadGenerator : MonoBehaviour
 {
     [Header("对象设置")]
-    public Transform player;            // 玩家对象
-    public GameObject roadPrefab;       // 道路预制体 (1米长)
+    [Tooltip("玩家对象，用于获取位置和动态生成道路")]
+    public Transform player;
+
+    [Tooltip("道路块预制体（长度应为 1 米）")]
+    public GameObject roadPrefab;
 
     [Header("生成参数")]
-    [Tooltip("玩家身前多少米内铺满道路")]
-    public float spawnDistance = 20f;   // 身前生成距离
+    [Tooltip("玩家身前多少米内必须铺满道路")]
+    public float spawnDistance = 20f;
 
-    [Tooltip("玩家身后多少米外开始回收道路")]
-    public float despawnDistance = 10f; // 身后回收距离
+    [Tooltip("玩家身后多少米外的道路块会被回收（对象池）")]
+    public float despawnDistance = 10f;
 
-    [Tooltip("初始生成位置：玩家前方多少米开始")]
-    public float startOffset = 1f;      // 初始偏移 (玩家前方1米)
+    [Tooltip("初始生成位置：玩家前方多少米开始（当 initialFromOrigin = false 时生效）")]
+    public float startOffset = 1f;
 
-    [Tooltip("道路块的长度（与预制体匹配）")]
+    [Tooltip("道路块的长度（必须与预制体匹配，默认 1 米）")]
     public float blockLength = 1f;
 
+    [Header("初始化设置")]
+    [Tooltip("启用：游戏开始时从原点前方 startOffset 米处开始生成道路（忽略玩家初始位置）。\n禁用：从玩家当前位置前方 startOffset 米处开始生成。")]
+    public bool initialFromOrigin = true;   // 新增开关，默认从原点开始
+
     // 内部数据
-    private Queue<GameObject> activeRoads = new Queue<GameObject>();
-    private Queue<GameObject> inactivePool = new Queue<GameObject>();
-    private float lastSpawnZ;           // 最后一个生成的道路块的 Z 坐标
+    private Queue<GameObject> activeRoads = new Queue<GameObject>();   // 当前激活的道路块队列
+    private Queue<GameObject> inactivePool = new Queue<GameObject>();  // 回收的道路块对象池
+    private float lastSpawnZ;               // 最后一个生成的道路块的 Z 坐标
 
     void Start()
     {
-        // 初始化：从玩家前方 startOffset 米处开始生成
-        lastSpawnZ = player.position.z + startOffset;
-
-        // 向前生成直到覆盖 spawnDistance 范围
-        while (lastSpawnZ < player.position.z + startOffset + spawnDistance)
+        if (initialFromOrigin)
         {
-            SpawnRoad(lastSpawnZ);
-            lastSpawnZ += blockLength;
+            // 从原点前方 startOffset 米处开始生成，忽略玩家初始位置
+            lastSpawnZ = startOffset;
+            // 向前生成直到覆盖 spawnDistance 范围
+            while (lastSpawnZ < startOffset + spawnDistance)
+            {
+                SpawnRoad(lastSpawnZ);
+                lastSpawnZ += blockLength;
+            }
+        }
+        else
+        {
+            // 原逻辑：从玩家前方 startOffset 米处开始生成
+            lastSpawnZ = player.position.z + startOffset;
+            while (lastSpawnZ < player.position.z + startOffset + spawnDistance)
+            {
+                SpawnRoad(lastSpawnZ);
+                lastSpawnZ += blockLength;
+            }
         }
     }
 

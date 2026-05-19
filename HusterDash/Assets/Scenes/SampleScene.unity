@@ -283,7 +283,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 1758055178}
-  offset: {x: 0, y: 8, z: -4}
+  offset: {x: 0, y: 10, z: -5}
   fixedRotation: {x: 60, y: 0, z: 0}
 --- !u!1 &410087039
 GameObject:
@@ -1022,8 +1022,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 64
-  m_fontSizeBase: 64
+  m_fontSize: 75
+  m_fontSizeBase: 75
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1364,6 +1364,7 @@ MonoBehaviour:
   despawnDistance: 5
   startOffset: 1
   blockLength: 1
+  initialFromOrigin: 1
 --- !u!4 &1480377760
 Transform:
   m_ObjectHideFlags: 0
@@ -1514,6 +1515,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1501513094}
   m_CullTransparentMesh: 1
+--- !u!1 &1749128979
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1749128981}
+  - component: {fileID: 1749128980}
+  m_Layer: 0
+  m_Name: IntroCamera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1749128980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749128979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa33019919175ef4491e54809d3d6aa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1758055178}
+  playerAnimator: {fileID: 1758055175}
+  walkSpeed: 1
+  blendParam: Speed
+  animSpeedParam: AnimSpeed
+  introAnimSpeed: 1
+  startCameraPosition: {x: 5, y: 1.6, z: 0}
+  finalOffset: {x: 0, y: 10, z: -5}
+  finalRotation: {x: 60, y: 0, z: 0}
+  cameraRotateDuration: 2
+--- !u!4 &1749128981
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749128979}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.3520035, y: 1.393411, z: -0.056368813}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1758055174 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 1d7ed1a6a461be245b9b5decba04daac,
@@ -1554,6 +1609,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 2
+  blendParam: Speed
+  animSpeedParam: AnimSpeed
+  gameAnimSpeed: 2
 --- !u!4 &1758055178 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 1d7ed1a6a461be245b9b5decba04daac,
@@ -2296,6 +2354,7 @@ SceneRoots:
   - {fileID: 1480377760}
   - {fileID: 902742237}
   - {fileID: 1953357144}
+  - {fileID: 1749128981}
   - {fileID: 784321294}
   - {fileID: 1778289260}
   - {fileID: 631569826}
