@@ -12,6 +12,16 @@ public class GameManager : MonoBehaviour
     public Button restartButton;          // 重新开始按钮
     public Button menuButton;             // 返回主菜单按钮（暂未实现）
 
+    [Header("成绩显示")]
+    [Tooltip("用于显示本次成绩/历史最佳的 TextMeshPro 组件")]
+    public TMP_Text recordText;           // 拖入失败界面中的文本（可以是原来的最佳文本）
+
+    [Tooltip("新纪录时显示的文本模板，{0} 会被替换为里程数值")]
+    public string newRecordFormat = "新纪录！\n{0:F2} m";
+
+    [Tooltip("非新纪录时显示的文本模板，{0} 会被替换为历史最佳数值")]
+    public string bestRecordFormat = "历史最佳：{0:F2} m";
+
     private bool isGameOver = false;
 
     private void Awake()
@@ -24,13 +34,11 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        // 注册按钮事件
         if (restartButton != null)
             restartButton.onClick.AddListener(RestartGame);
         if (menuButton != null)
             menuButton.onClick.AddListener(BackToMenu);
 
-        // 确保开始时失败界面隐藏
         if (failPanel != null)
             failPanel.SetActive(false);
     }
@@ -43,38 +51,46 @@ public class GameManager : MonoBehaviour
         if (isGameOver) return;
         isGameOver = true;
 
-        // 暂停游戏时间（可选）
         Time.timeScale = 0f;
 
-        // 显示失败界面
+        // 获取本次里程和历史最佳
+        DistanceTracker tracker = FindObjectOfType<DistanceTracker>();
+        float currentDist = 0f;
+        float bestDist = 0f;
+        if (tracker != null)
+        {
+            currentDist = tracker.GetCurrentDistance();
+            bestDist = tracker.GetBestDistance();
+        }
+
+        // 判断是否为新纪录（当前里程 >= 历史最佳，且大于 0 避免空记录）
+        bool isNewRecord = (currentDist >= bestDist && currentDist > 0.01f);
+
+        // 更新失败界面的文本
+        if (recordText != null)
+        {
+            if (isNewRecord)
+                recordText.text = string.Format(newRecordFormat, currentDist);
+            else
+                recordText.text = string.Format(bestRecordFormat, bestDist);
+        }
+
         if (failPanel != null)
             failPanel.SetActive(true);
 
-        // 可以禁用玩家输入（通过 PlayerMove 的 enabled 属性）
         PlayerMove playerMove = FindObjectOfType<PlayerMove>();
         if (playerMove != null)
             playerMove.enabled = false;
     }
 
-    /// <summary>
-    /// 重新开始：重载当前场景
-    /// </summary>
     private void RestartGame()
     {
-        // 恢复时间（避免重载后仍为0）
         Time.timeScale = 1f;
-        // 重新加载当前场景
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    /// <summary>
-    /// 返回主菜单（暂未实现）
-    /// </summary>
     private void BackToMenu()
     {
-        // 这里可以加载主菜单场景，如果没有主菜单则提示
         Debug.Log("尚未实现主菜单功能");
-        // 如果希望返回一个简易菜单，可以自行扩展
-        // 简单起见，可恢复时间并隐藏面板，但通常返回主菜单会切换场景
     }
 }
