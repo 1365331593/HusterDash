@@ -1,46 +1,50 @@
 using UnityEngine;
-using UnityEngine.InputSystem;  // 必须引用新输入系统命名空间
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// 玩家移动控制脚本 - 适配新版 Input System（复用已有 PlayerControls 资产）
-/// 需要挂载到玩家角色上，并且场景中需要有一个 PlayerInput 组件。
+/// 新增功能：鼠标右键切换行走/奔跑，对应的动画由 Animator 中的 Bool 参数控制。
 /// </summary>
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerMove : MonoBehaviour
 {
     [Header("移动速度")]
-    [Tooltip("玩家移动速度（米/秒）")]
-    public float speed = 3f;
+    [Tooltip("行走速度（米/秒）")]
+    public float walkSpeed = 3f;
+    [Tooltip("奔跑速度（米/秒）")]
+    public float runSpeed = 6f;
 
-    [Header("动画混合参数")]
-    [Tooltip("Animator 中控制动画混合（Idle/Walk/Run）的参数名，默认 Speed")]
+    [Header("动画参数")]
+    [Tooltip("Animator 中控制动画混合（Idle/Walk）的 Float 参数名，默认 Speed")]
     public string blendParam = "Speed";
-
-    [Header("动画播放速度参数")]
-    [Tooltip("Animator 中控制动画剪辑播放速度的参数名（需与状态机中绑定的 Float 参数一致）")]
+    [Tooltip("Animator 中控制奔跑状态的 Bool 参数名（需在状态机中创建）")]
+    public string isRunningParam = "isRunning";
+    [Tooltip("Animator 中控制动画剪辑播放速度的 Float 参数名（仅行走时使用）")]
     public string animSpeedParam = "AnimSpeed";
-
-    [Tooltip("游戏中行走时的动画播放倍数（例如 2 表示二倍速）")]
+    [Tooltip("行走时动画的播放倍数（例如 2 表示二倍速）")]
     public float gameAnimSpeed = 2f;
 
-    [Header("输入系统设置（可选）")]
-    [Tooltip("Action Map 名称（如果你使用了非默认的 Map，可以在这里指定；留空则自动搜索）")]
-    public string actionMapName = "Player";   // 改为你已有的 Map 名称 "Player"
-    
-    [Tooltip("移动 Action 名称（必须与 Input Action Asset 中定义的一致）")]
-    public string moveActionName = "Move";    // 已有的 Move 动作
+    [Header("输入系统设置")]
+    [Tooltip("Action Map 名称（与 PlayerControls 资产中的 Map 名一致）")]
+    public string actionMapName = "Player";
+    [Tooltip("移动 Action 名称（默认 Move）")]
+    public string moveActionName = "Move";
+    [Tooltip("切换奔跑 Action 名称（默认 ToggleRun，需在 PlayerControls 中定义）")]
+    public string toggleRunActionName = "ToggleRun";
 
-    // 输入系统相关
+    // 组件引用
     private PlayerInput playerInput;
-    private InputAction moveAction;          // 移动输入动作
-    private Vector2 moveInput;               // 当前帧的移动输入值 (x, z)
-
+    private InputAction moveAction;
+    private InputAction toggleRunAction;
     private Animator anim;
-    private Vector3 moveDirection;           // 实际移动方向（世界坐标系）
+
+    // 输入状态
+    private Vector2 moveInput;
+    private Vector3 moveDirection;
+    private bool isRunning = false;          // 当前是否奔跑
 
     private void Awake()
     {
-        // 获取 PlayerInput 组件
         playerInput = GetComponent<PlayerInput>();
         if (playerInput == null)
         {
@@ -48,21 +52,21 @@ public class PlayerMove : MonoBehaviour
             return;
         }
 
-        // 尝试通过 Action Map 名称和 Action 名称获取输入动作
-        // 方法1：直接通过 actions 字典查找（推荐，因为 Move 是全局唯一的）
-        moveAction = playerInput.actions[moveActionName];
+        // 获取移动 Action
+        moveAction = playerInput.actions.FindAction(moveActionName);
         if (moveAction == null && !string.IsNullOrEmpty(actionMapName))
         {
-            // 方法2：先获取 Map，再获取 Action（适用于有多个同名 Action 在不同 Map 中的情况）
             var actionMap = playerInput.actions.FindActionMap(actionMapName);
             if (actionMap != null)
                 moveAction = actionMap.FindAction(moveActionName);
         }
-
         if (moveAction == null)
-        {
-            Debug.LogError($"PlayerMove: 在 Input Action Asset 中找不到名为 '{moveActionName}' 的 Action！请检查 PlayerControls 资产，确保存在该 Action，且当前使用的 Action Map 已激活。");
-        }
+            Debug.LogError($"PlayerMove: 找不到 Action '{moveActionName}'，请检查 PlayerControls 资产。");
+
+        // 获取切换奔跑 Action
+        toggleRunAction = playerInput.actions.FindAction(toggleRunActionName);
+        if (toggleRunAction == null)
+            Debug.LogWarning($"PlayerMove: 找不到 Action '{toggleRunActionName}'，右键切换奔跑功能将不可用。");
     }
 
     private void Start()
@@ -74,56 +78,74 @@ public class PlayerMove : MonoBehaviour
 
     private void OnEnable()
     {
-        // 启用输入动作（确保可以接收输入）
-        if (moveAction != null)
-            moveAction.Enable();
+        moveAction?.Enable();
+        toggleRunAction?.Enable();
+
+        // 注册右键点击事件（仅在动作完成时触发一次）
+        if (toggleRunAction != null)
+            toggleRunAction.performed += OnToggleRun;
     }
 
     private void OnDisable()
     {
-        // 禁用输入动作（避免在游戏结束或其他状态下误接收输入）
-        if (moveAction != null)
-            moveAction.Disable();
+        moveAction?.Disable();
+        toggleRunAction?.Disable();
+
+        if (toggleRunAction != null)
+            toggleRunAction.performed -= OnToggleRun;
     }
 
     private void Update()
     {
         if (moveAction == null) return;
 
-        // 从 Input System 读取移动输入值（Vector2，x=左右，y=前后）
+        // 读取移动输入
         moveInput = moveAction.ReadValue<Vector2>();
-
-        // 构建移动向量 (x, 0, z)
         moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
 
-        // 面向移动方向（只有当有有效输入时才转向）
+        // 面向移动方向
         if (moveDirection.magnitude > 0.01f)
             transform.LookAt(transform.position + moveDirection);
 
-        // 执行移动（使用世界坐标系，不受相机旋转影响）
-        transform.position += moveDirection * speed * Time.deltaTime;
+        // 根据状态选择速度并移动
+        float currentSpeed = isRunning ? runSpeed : walkSpeed;
+        transform.position += moveDirection * currentSpeed * Time.deltaTime;
 
-        // 更新动画参数
+        // 更新动画
         UpdateAnim();
     }
 
     /// <summary>
-    /// 更新 Animator 中的混合参数和动画速度参数
+    /// 更新 Animator 参数
     /// </summary>
     private void UpdateAnim()
     {
         if (anim == null) return;
 
-        // 1. 动画混合值：移动输入的大小（范围 0~1，最大为 1）
+        // 1. 移动量（0~1），用于 Idle / Walk 切换
         float blendValue = moveDirection.magnitude;
         anim.SetFloat(blendParam, blendValue);
 
-        // 2. 动画播放速度：移动时使用 gameAnimSpeed，静止时为 0
-        float speedValue = (moveDirection.magnitude > 0.01f) ? gameAnimSpeed : 0f;
-        anim.SetFloat(animSpeedParam, speedValue);
+        // 2. 是否奔跑（Bool 参数，需在 Animator 中创建）
+        anim.SetBool(isRunningParam, isRunning);
+
+        // 3. 动画播放速度：仅在行走移动时使用 gameAnimSpeed，奔跑和静止都不修改（保持 1 倍速）
+        if (blendValue > 0.01f && !isRunning)
+            anim.SetFloat(animSpeedParam, gameAnimSpeed);
+        else
+            anim.SetFloat(animSpeedParam, 1f);   // 静止或奔跑时恢复默认速度
     }
 
-    // 碰撞检测（与原来保持一致）
+    /// <summary>
+    /// 右键点击回调：切换行走/奔跑
+    /// </summary>
+    private void OnToggleRun(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+            isRunning = !isRunning;
+    }
+
+    // 原有碰撞检测逻辑保持不变
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.layer == LayerMask.NameToLayer("Vehicle"))
