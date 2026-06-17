@@ -41,6 +41,9 @@ public class ThirdPersonCameraController : MonoBehaviour
     private float bottomRatio;
     private bool isCursorLocked;
 
+    // 缩放是否启用（外部控制，如 UI 面板弹出时禁用滚轮缩放）
+    private bool zoomEnabled = true;
+
     void Start()
     {
         if (lockCursorOnStart) LockCursor();
@@ -102,6 +105,7 @@ public class ThirdPersonCameraController : MonoBehaviour
     /// </summary>
     private void HandleZoom()
     {
+        if (!zoomEnabled) return;
         if (freeLookCamera == null || zoomAction == null)
             return;
 
@@ -179,4 +183,13 @@ public class ThirdPersonCameraController : MonoBehaviour
 
     public void ForceUnlockCursor() { UnlockCursor(); SetSensitivity(unlockedSensitivity); }
     public void ForceLockCursor() { LockCursor(); SetSensitivity(normalSensitivity); }
+
+    /// <summary>
+    /// 作用: 启用或禁用滚轮缩放功能（用于 UI 面板弹出时禁用缩放避免冲突）
+    /// </summary>
+    /// <param name="enabled">true 启用缩放，false 禁用缩放</param>
+    public void SetZoomEnabled(bool enabled)
+    {
+        zoomEnabled = enabled;
+    }
 }
