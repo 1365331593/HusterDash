@@ -63,8 +63,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minSpawnInterval: 0.5
   maxSpawnInterval: 2.5
-  vehicleXRange: 12
+  roadHalfWidth: 15
   vehicleYSpawn: 0
+  minBlockSpeed: 3
+  maxBlockSpeed: 8
 --- !u!1001 &3734976174140184673
 PrefabInstance:
   m_ObjectHideFlags: 0
