@@ -264,6 +264,7 @@ MonoBehaviour:
   thirdPersonCamera: {fileID: 0}
   playerTag: Player
   borderQuad: {fileID: 4553909851528292563}
+  borderYOffset: 0.01
 --- !u!1 &7963020227912505291
 GameObject:
   m_ObjectHideFlags: 0
@@ -292,7 +293,7 @@ Transform:
   m_GameObject: {fileID: 7963020227912505291}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: -0.445, z: 0}
+  m_LocalPosition: {x: 0, y: 0.01, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

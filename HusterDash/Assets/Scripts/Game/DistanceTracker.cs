@@ -133,4 +133,14 @@ public class DistanceTracker : MonoBehaviour
     {
         return bestDistance;
     }
+
+    /// <summary>
+    /// 重置缓存的的最佳里程为 0（供 PauseMenuManager 清空成绩后调用，使 GameOver 面板立即反映清空状态）
+    /// </summary>
+    public void ResetBestDistance()
+    {
+        bestDistance = 0f;
+        if (logBestUpdate)
+            Debug.Log("DistanceTracker: 历史最佳里程已重置为 0。");
+    }
 }

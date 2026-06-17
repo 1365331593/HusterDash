@@ -29,6 +29,17 @@ public class GameManager : MonoBehaviour
 
     private bool isGameOver = false;
 
+    /// <summary>
+    /// 是否已游戏结束（公开只读属性，供 PauseMenuManager 等外部查询）
+    /// </summary>
+    public bool IsGameOver => isGameOver;
+
+    /// <summary>
+    /// 是否处于暂停状态（由 PauseMenuManager 设置），供外部查询以阻止 Alt 光标操作
+    /// </summary>
+    [HideInInspector]
+    public bool IsPaused = false;
+
     private void Awake()
     {
         if (Instance == null)
@@ -141,7 +152,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void OnAltPressed(InputAction.CallbackContext ctx)
     {
-        if (!isGameOver)
+        // 游戏结束或暂停时不允许 Alt 操作光标
+        if (!isGameOver && !IsPaused)
             UnlockCursor();
     }
 
@@ -150,7 +162,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void OnAltReleased(InputAction.CallbackContext ctx)
     {
-        if (!isGameOver)
+        // 游戏结束或暂停时不允许 Alt 操作光标
+        if (!isGameOver && !IsPaused)
             LockCursor();
     }
 
