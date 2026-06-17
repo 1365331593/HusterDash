@@ -119,7 +119,11 @@ public class GameManager : MonoBehaviour
 
     private void BackToMenu()
     {
-        Debug.Log("尚未实现主菜单功能");
+        // 恢复时间缩放，避免影响主菜单场景
+        Time.timeScale = 1f;
+
+        // 卸载当前 Game 场景，加载 MainMenu 场景
+        SceneManager.LoadScene("MainMenu", LoadSceneMode.Single);
     }
 
     // ----- Alt 键临时呼出光标 -----
