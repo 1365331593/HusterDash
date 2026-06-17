@@ -113,8 +113,12 @@ public class GameManager : MonoBehaviour
 
     private void RestartGame()
     {
+        // 恢复时间缩放
         Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+        // 通过过渡管理器带淡入淡出效果重新加载当前场景
+        string currentScene = SceneManager.GetActiveScene().name;
+        SceneTransitionManager.LaunchTransition(currentScene);
     }
 
     private void BackToMenu()
@@ -122,8 +126,12 @@ public class GameManager : MonoBehaviour
         // 恢复时间缩放，避免影响主菜单场景
         Time.timeScale = 1f;
 
-        // 卸载当前 Game 场景，加载 MainMenu 场景
-        SceneManager.LoadScene("MainMenu", LoadSceneMode.Single);
+        // 隐藏失败界面，避免遮挡过渡动画
+        if (failPanel != null)
+            failPanel.SetActive(false);
+
+        // 通过过渡管理器带淡入淡出效果切换到 MainMenu 场景
+        SceneTransitionManager.LaunchTransition("MainMenu");
     }
 
     // ----- Alt 键临时呼出光标 -----
