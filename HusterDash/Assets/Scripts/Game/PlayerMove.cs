@@ -24,6 +24,14 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("行走时动画的播放倍数（例如 2 表示二倍速）")]
     public float gameAnimSpeed = 2f;
 
+    [Header("移动范围限制")]
+    [Tooltip("X 轴左边界（世界坐标）")]
+    public float minX = -15f;
+    [Tooltip("X 轴右边界（世界坐标）")]
+    public float maxX = 15f;
+    [Tooltip("Z 轴后边界（世界坐标）")]
+    public float minZ = -2f;
+
     [Header("输入系统设置")]
     [Tooltip("Action Map 名称（与 PlayerControls 资产中的 Map 名一致）")]
     public string actionMapName = "Player";
@@ -107,9 +115,12 @@ public class PlayerMove : MonoBehaviour
         if (moveDirection.magnitude > 0.01f)
             transform.LookAt(transform.position + moveDirection);
 
-        // 根据状态选择速度并移动
+        // 根据状态选择速度，计算目标位置并钳制到边界内
         float currentSpeed = isRunning ? runSpeed : walkSpeed;
-        transform.position += moveDirection * currentSpeed * Time.deltaTime;
+        Vector3 targetPos = transform.position + moveDirection * currentSpeed * Time.deltaTime;
+        targetPos.x = Mathf.Clamp(targetPos.x, minX, maxX);
+        targetPos.z = Mathf.Max(targetPos.z, minZ);
+        transform.position = targetPos;
 
         // 更新动画
         UpdateAnim();
