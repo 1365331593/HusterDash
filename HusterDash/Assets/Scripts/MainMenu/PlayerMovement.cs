@@ -4,10 +4,11 @@ using UnityEngine;
 /// 玩家角色移动脚本
 /// 职责：
 /// 1. 执行实际的物理移动（通过CharacterController）
-/// 2. 将输入方向转换为相对相机的世界方向
-/// 3. 平滑旋转角色面向移动方向
-/// 4. 驱动动画参数（Speed、IsMoving）
-/// 5. 管理行走/奔跑状态的切换
+/// 2. 管理重力和垂直速度，支持斜坡行走和从高处跌落
+/// 3. 将输入方向转换为相对相机的世界方向
+/// 4. 平滑旋转角色面向移动方向
+/// 5. 驱动动画参数（Speed、IsMoving）
+/// 6. 管理行走/奔跑状态的切换
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
@@ -34,6 +35,13 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("角色面朝方向平滑过渡的时间（秒），越小转向越灵敏")]
     public float rotationSmoothTime = 0.1f;
 
+    [Header("重力")]
+    [Tooltip("重力加速度（米/秒²），角色在空中时每帧累加")]
+    public float gravity = -9.81f;
+    
+    [Tooltip("角色在地面时施加的向下力，防止浮空抖动")]
+    public float groundedForce = -2f;
+
     [Header("调试信息")]
     [Tooltip("当前是否处于奔跑模式")]
     [SerializeField] private bool isRunning = false;
@@ -46,6 +54,9 @@ public class PlayerMovement : MonoBehaviour
     
     /// <summary>角色转向平滑插值所需的角速度变量</summary>
     private float rotationVelocity;
+    
+    /// <summary>角色垂直方向的速度（Y轴），用于重力累加和跌落</summary>
+    private float verticalVelocity;
 
     void Awake()
     {
@@ -83,13 +94,28 @@ public class PlayerMovement : MonoBehaviour
 
     /// <summary>
     /// 核心移动逻辑：
-    /// 1. 将输入方向转换为以相机为参考的世界方向
-    /// 2. 通过CharacterController移动角色
-    /// 3. 平滑旋转角色朝向移动方向
+    /// 1. 检测是否在地面并计算重力（垂直速度）
+    /// 2. 将输入方向转换为以相机为参考的世界方向
+    /// 3. 合并水平移动与垂直速度，通过CharacterController移动角色
+    /// 4. 平滑旋转角色朝向移动方向
+    /// CharacterController内置的Step Offset会自动跨过低矮台阶，
+    /// Slope Limit会自动处理斜坡行走。
     /// </summary>
     private void HandleMovement()
     {
-        // ----- 计算相机相对移动方向 -----
+        // ----- 地面检测与重力计算 -----
+        if (characterController.isGrounded && verticalVelocity < 0f)
+        {
+            // 在地面时保持一个微小的向下力，确保持续贴地
+            verticalVelocity = groundedForce;
+        }
+        else
+        {
+            // 在空中时累加重力加速度
+            verticalVelocity += gravity * Time.deltaTime;
+        }
+
+        // ----- 计算水平移动方向 -----
         // 获取输入的大小（0~1之间，表示移动强度）
         float inputMagnitude = currentInput.magnitude;
         
@@ -116,14 +142,16 @@ public class PlayerMovement : MonoBehaviour
             moveDirection = Vector3.zero;
         }
 
-        // ----- 执行移动 -----
+        // ----- 执行移动（合并水平移动与垂直速度）-----
         if (moveDirection.magnitude > 0f)
         {
             // 根据当前模式选择速度
             float currentSpeed = isRunning ? runSpeed : walkSpeed;
-            // CharacterController.Move按世界方向移动，自动处理碰撞检测
-            // 乘以Time.deltaTime确保帧率无关
-            characterController.Move(moveDirection.normalized * currentSpeed * Time.deltaTime);
+            // 合并水平移动方向和垂直速度（重力）
+            Vector3 motion = moveDirection.normalized * currentSpeed * Time.deltaTime;
+            motion.y = verticalVelocity * Time.deltaTime;
+            // CharacterController.Move自动处理斜坡行走和台阶跨越
+            characterController.Move(motion);
 
             // ----- 平滑旋转角色朝向移动方向 -----
             // 计算目标朝向角度
@@ -133,6 +161,12 @@ public class PlayerMovement : MonoBehaviour
                 ref rotationVelocity, rotationSmoothTime);
             // 设置角色旋转
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
+        }
+        else
+        {
+            // 无输入时仅应用重力，保持角色贴地或下落
+            Vector3 motion = new Vector3(0f, verticalVelocity * Time.deltaTime, 0f);
+            characterController.Move(motion);
         }
     }
 
