@@ -152,8 +152,29 @@ public class MusicManager : MonoBehaviour
         }
         else if (_instance != this)
         {
-            Destroy(gameObject);
-            return;
+            // 如果已有实例是自动创建的空壳（没有音频剪辑引用），
+            // 而当前实例已配置了音频剪辑，则销毁空壳并接管为正式实例。
+            // 这解决了 Splash 场景作为首场景时，SceneTransitionManager
+            // 提前触发 MusicManager.Instance 导致空壳实例阻塞后续
+            // 正确配置的 MusicManager 的问题。
+            bool existingEmpty = (_instance.mainMenuMusic == null && _instance.gameMusic == null);
+            bool currentHasClips = (mainMenuMusic != null || gameMusic != null);
+
+            if (existingEmpty && currentHasClips)
+            {
+                Destroy(_instance.gameObject);
+                _instance = this;
+                DontDestroyOnLoad(gameObject);
+                CreateAudioSources();
+                LoadAllSettings();
+                ApplyVolumeSettings();
+                SceneManager.activeSceneChanged += OnActiveSceneChanged;
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
         }
     }
 
