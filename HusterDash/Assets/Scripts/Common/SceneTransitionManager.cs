@@ -187,6 +187,10 @@ public class SceneTransitionManager : MonoBehaviour
         // 第一阶段：淡入（遮罩逐渐变为不透明，Loading 文字逐渐显现）
         yield return StartCoroutine(FadeOverlay(0f, 1f, halfDuration));
 
+        // 通知音乐管理器准备场景切换（提前淡出当前场景音乐）
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.OnSceneTransitionStart(sceneName);
+
         // 第二阶段：异步加载目标场景
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
         if (asyncLoad != null)

@@ -120,6 +120,10 @@ public class GameManager : MonoBehaviour
         PlayerMove playerMove = FindObjectOfType<PlayerMove>();
         if (playerMove != null)
             playerMove.enabled = false;
+
+        // 通知音乐管理器：游戏失败（若启用特殊失败音乐则播放第三首音乐）
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.OnGameOver();
     }
 
     private void RestartGame()

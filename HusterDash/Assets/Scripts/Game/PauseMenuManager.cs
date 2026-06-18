@@ -41,6 +41,10 @@ public class PauseMenuManager : MonoBehaviour
     [Tooltip("取消清空按钮")]
     public Button cancelClearButton;
 
+    [Header("音量按钮")]
+    [Tooltip("音量调节按钮图标（GameObject），暂停时与暂停按钮同步隐藏")]
+    public GameObject volumeButton;
+
     [Header("输入")]
     [Tooltip("Player/Pause Action 的 InputActionReference（绑定 Esc 键）")]
     public InputActionReference pauseAction;
@@ -108,12 +112,14 @@ public class PauseMenuManager : MonoBehaviour
             cachedIntroController = FindObjectOfType<IntroCameraController>();
         }
 
-        // 根据是否允许暂停动态控制暂停按钮的显隐（仅在非暂停状态下管理）
-        if (!isPaused && pauseButton != null)
+        // 根据是否允许暂停动态控制暂停按钮和音量按钮的显隐（仅在非暂停状态下管理）
+        if (!isPaused)
         {
             bool shouldShow = CanPause();
-            if (pauseButton.activeSelf != shouldShow)
+            if (pauseButton != null && pauseButton.activeSelf != shouldShow)
                 pauseButton.SetActive(shouldShow);
+            if (volumeButton != null && volumeButton.activeSelf != shouldShow)
+                volumeButton.SetActive(shouldShow);
         }
     }
 
@@ -165,9 +171,11 @@ public class PauseMenuManager : MonoBehaviour
         if (GameManager.Instance != null)
             GameManager.Instance.IsPaused = true;
 
-        // 隐藏暂停按钮，显示暂停面板
+        // 隐藏暂停按钮和音量按钮，显示暂停面板
         if (pauseButton != null)
             pauseButton.SetActive(false);
+        if (volumeButton != null)
+            volumeButton.SetActive(false);
         if (pausePanel != null)
             pausePanel.SetActive(true);
         if (confirmDialog != null)
@@ -204,9 +212,11 @@ public class PauseMenuManager : MonoBehaviour
         if (GameManager.Instance != null)
             GameManager.Instance.IsPaused = false;
 
-        // 显示暂停按钮，隐藏暂停面板和确认弹窗
+        // 显示暂停按钮和音量按钮，隐藏暂停面板和确认弹窗
         if (pauseButton != null)
             pauseButton.SetActive(true);
+        if (volumeButton != null)
+            volumeButton.SetActive(true);
         if (pausePanel != null)
             pausePanel.SetActive(false);
         if (confirmDialog != null)
