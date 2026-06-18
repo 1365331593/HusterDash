@@ -70,6 +70,10 @@ public class GameStartZone : MonoBehaviour
         if (!isPlayerInside)
             return;
 
+        // 教程面板显示时跳过所有交互逻辑，防止重复触发
+        if (TutorialPanelManager.IsShowing)
+            return;
+
         // 一次性诊断：刚进入区域时输出完整状态
         if (!hasLoggedEntry)
         {
@@ -172,6 +176,9 @@ public class GameStartZone : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag(playerTag)) return;
+
+        // 教程面板显示时不处理离开事件（此时玩家已被冻结，此检查为防御性代码）
+        if (TutorialPanelManager.IsShowing) return;
 
         isPlayerInside = false;
         scrollAccumulator = 0f;

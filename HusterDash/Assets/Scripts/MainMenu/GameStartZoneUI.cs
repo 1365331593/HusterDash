@@ -295,11 +295,20 @@ public class GameStartZoneUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 作用: Inspector 可绑定的包装方法 —— 新手教学（当前为占位，无实际逻辑）
+    /// 作用: 新手教学 —— 查找并打开教程面板
     /// </summary>
     public void OnTutorialClicked()
     {
-        Debug.Log("GameStartZoneUI: 新手教学 - 占位选项，暂无功能");
+        TutorialPanelManager tutorialPanel = FindObjectOfType<TutorialPanelManager>();
+        if (tutorialPanel != null)
+        {
+            Debug.Log("GameStartZoneUI: 打开新手教学面板");
+            tutorialPanel.Show();
+        }
+        else
+        {
+            Debug.LogError("GameStartZoneUI: 未找到 TutorialPanelManager！请确保场景中已放置教程面板预制体。");
+        }
     }
 
 #if UNITY_EDITOR
